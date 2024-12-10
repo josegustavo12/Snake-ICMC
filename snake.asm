@@ -1,61 +1,58 @@
 ;GRUPO: 
 ;
-; BRUNO 
-; JADE
-; PEDRO 
-; THIAGO
-; ORGANIZAÇÃO DE COMPUTADORES DIGITAIS - SIMÕES
-; 
-; SNAKE
+; JOSÉ GUSTAVO VICTOR PINHEIRO ALENCAR / 14783765 
+; MANASSÉS ARANGE DE MOURA
+; LARISSA DE MELO ANDRADE 
+; CAROLINA GOMES GUERRERO
+; SNAKE ICMC
 
 
-SnakePos:  	var #500 ; tamanho MAXIMO da snake
-SnakeSize:	var #1
-Dir:		var #1 ; 0-direita, 1-baixo, 2-esquerda, 3-cima
+SnakePos:  	var #500 ; tamanho MAXIMO da snake - Array para posições da cobra
+SnakeTam:	var #1   ; tamanho atual da cobra
+Direcao:		var #1   ; Direção da cobra (0-Direita, 1-baixo, 2-esquerda, 3-cima)
 
-FoodPos:	var #1
-FoodStatus:	var #1
-Score: var #1
-Stage: var #1
-Speed: var #1
-FlagTiro: var #1
-posAtualTiro	: var #1
-posAntTiro	: var #1
+FoodPos:	var #1    ; posição da comida
+FoodStatus:	var #1    ; status da comida (se precisa ser recolocada ou não)
+Pontuacao:      var #1    ; pontuação do jogador
+Fase:      var #1    ; nível/fase atual do jogo
+Velocidade:      var #1    ; Velocidade de jogo (usada no delay)
+FlagTiro:   var #1    ; flag indicando se tiro está ativo
+posAtualTiro: var #1   ; posição atual do tiro
+posAntTiro: var #1     ; posição anterior do tiro
 
-
-GameOverMessage: 	string " FIM DE JOGO! "
+GameOverMessage: 	string " FIM DE JOGO, ICMCER! "
 EraseGameOver:		string "           "
 RestartMessage:		string " TENTE NOVAMENTE! APERTE 'SPACE' "
 EraseRestart:		string "                          "
 
-SuccessMessage: 		string " MUITO BOOOOOOM! "
+SuccessMessage: 		string " DIVOOOOOOOUUUUU!!! "
 EraseSuccessMessage: 	string "                 "
-NextLevelMessage: 		string " APERTE 'SPACE' E PREPARE-SE "
+NextLevelMessage: 		string " APERTE 'SPACE' E CONTINUE "
 EraseNextLevelMessage:	string "                               "
 
 
 ; Main
 main:
 	
-	call inicialize_speed
-	call inicialize_flag_e_tiro
-	call Initialize
-	
-	
-	loadn R1, #tela1Linha0	; Endereco da primeira linha do ambiente do jogo!!
+	; inicializando o jogo, chamando as subrotinas e carregando a tela inicial
+	call Inicia_Velocidade ; velocidade = 6000
+	call Inicia_flag_e_tiro ; estado do tiro = 0 ou 1; posicao do tiro (atual e anterior)
+	call Inicia
+
+	; subrotina completa para desenhar uma fase
+	loadn R1, #tela1Linha0	; Endereco da primeira linha do ambiente do jogo
 	loadn R2, #0
-	call Draw_Stage
-	
-	
-	call inicialize_score	
-	call inicialize_stage_number	
+	call Desenha_Fase
+
+	call Inicia_Pontuacao	; inicia o placar
+	call Inicia_Fase_numero	; inicia o numero da fase
 	
 	loop:
 		
 		ingame_loop:
 			call Draw_Snake
 			
-			call stage_checker
+			call Fase_colisoes ; verifica colisões 
 			
 			call Move_Snake
 			call Replace_Food
@@ -72,91 +69,101 @@ main:
 	
 ; Funções
 
-stage_checker:
+Fase_colisoes:
 	
-	load r3, Stage
-	loadn r4, #48
+	load r3, Fase
+	loadn r4, #48 ; r4 = 0
 	
 
-	cmp r3,r4
-	jeq stage0
+	cmp r3, r4 ; if r3 == r4 ou fase_atual == Fase1 => jump Fase1
+	jeq Fase1
 	
-	inc r4
+	inc r4 ; se não for 0, incrementa 1, ou seja, r4 = 1
 	
-	cmp r3, r4
-	jeq stage1
+	cmp r3, r4 ; mesmo processo da Fase1
+	jeq Fase2
 	
-	inc r4
+	inc r4 ; r4 = 2
 	
-	cmp r3, r6
-	jeq stage2
-	
-	stage0:
-	call Dead_Snake_0	
-	jmp fim
+	cmp r3, r6 ; MUDANCA DO GPT AQUIIIIIIIIIIIIIIIIIIII r3, r6
+	jeq Fase3
 
-	stage1:
-	call Dead_Snake_1
+	inc r4 ; r4 = 3
+	
+	;cmp r3, r4
+	;jeq Fase4 
+	
+	Fase1: 
+	call Morte_Snake_1	
+	jmp fim ; fim do jogo
+
+	Fase2:
+	call Morte_Snake_2
 	jmp fim
 	
-	stage2:
-	call Dead_Snake_2
+	Fase3:
+	call Morte_Snake_3
 	call Torre
+	;jmp fim ; MUDANCA DO GPT AQUIIIIIIIIIIIIIIIIIIII
+
+	;Fase4:
+	;call Morte_Snake_4
+	;jmp fim
 	
 	fim:
 	rts	
 
-inicialize_score:
+Inicia_Pontuacao:
 	
-	loadn r0, #48
-	store Score, r0
+	loadn r0, #48 ; inicializa a pontuação com zero
+	store Pontuacao, r0 ; carrega a pontação no Pontuacao
 	
-	loadn r1, #9
-	load r2, Score
+	loadn r1, #9 ; posição da pontuação na tela
+	load r2, Pontuacao  
 	
-	outchar r2, r1
+	outchar r2, r1 ; MUDAR A COOOOOOOOOOR
 	 
 	rts
 	
-inicialize_stage_number:
+Inicia_Fase_numero:
 	
-	loadn r0, #48
-	store Stage, r0
+	loadn r0, #48 
+	store Fase, r0 ; carrega no endereço Fase com zero
 	
 	loadn r1, #49
-	load r2, Stage
+	load r2, Fase
 	
 	outchar r2, r1
 	 
 	rts
 
-inicialize_speed:
+Inicia_Velocidade:
 	
 	loadn r0, #6000
-	store Speed, r0
+	store Velocidade, r0 ; carrega o Velocidade com 6000
 		 
 	rts
 
-inicialize_flag_e_tiro:
+Inicia_flag_e_tiro:
 	
 	loadn r0, #0
-	store FlagTiro, r0
+	store FlagTiro, r0 ; indica se o tiro está ativo ou não
 		
 	loadn r1, #1019
-	store posAtualTiro, r1
+	store posAtualTiro, r1 ; posAtualTiro guarda a posição do tiro na tela, inicialmente 1019
 		
 	loadn r2, #1059
-	store posAntTiro, r2
+	store posAntTiro, r2 ; posição anterior do tiro para dar ideia de movimento
 				
 						 
 	rts	
 	
-Initialize:
+Inicia: ; 1. inicia o tamanho da cobra 2. declara cada pedaço da cobra 3. printa a cobra 4. inicia a direcao inicial da cobra
 		push r0
 		push r1
 		
 		loadn r0, #3
-		store SnakeSize, r0
+		store SnakeTam, r0 ; tamanho inicial da cobra
 		
 		; SnakePos[0] = 460
 		loadn 	r0, #SnakePos
@@ -172,21 +179,17 @@ Initialize:
 		inc 	r0
 		dec 	r1
 		storei 	r0, r1
-		
-		; SnakePos[3] = 457
+
+		; SnakePos[3] = -1
 		inc 	r0
 		dec 	r1
 		storei 	r0, r1
 		
-		; SnakePos[4] = -1
-		inc 	r0
-		loadn 	r1, #0
-		storei 	r0, r1
 				
-		call FirstPrintSnake
+		call FirstPrintSnake ; printa a cobra inicial
 		
 		loadn r0, #0
-		store Dir, r0
+		store Direcao, r0 ; Direção da cobra (0-Direita, 1-baixo, 2-esquerda, 3-cima)
 		
 		pop r1
 		pop r0
@@ -197,26 +200,26 @@ FirstPrintSnake:
 	push r0
 	push r1
 	push r2
-	push r3
+	push r3					; CASO DE TEMPO, MUDE O CORPO DA CABEÇA
 	
-	loadn r0, #SnakePos		; r0 = & SnakePos
-	loadn r1, #'%'			; r1 = '}'
+	loadn r0, #SnakePos		; r0 = endereço do array da cobra
+	loadn r1, #'%'			; caractere da cobra
 	loadi r2, r0			; r2 = SnakePos[0]
 		
 	loadn 	r3, #0			; r3 = 0
 	
 	Print_Loop:
-		outchar r1, r2
+		outchar r1, r2      ; imprime '%' na posição r2 (posição da cobra)
 		
 		inc 	r0
 		loadi 	r2, r0
 		
 		cmp r2, r3
-		jne Print_Loop
+		jne Print_Loop     ; imprime até chegar no -1
 	
-	
-	loadn 	r0, #820
-	loadn 	r1, #'.'
+	; imprime a comida do inicio 
+	loadn 	r0, #820 ; posição da comida
+	loadn 	r1, #'.' ; . -> comida
 	outchar r1, r0
 	store 	FoodPos, r0
 	
@@ -233,15 +236,15 @@ EraseSnake:
 	push r2
 	push r3
 	
-	loadn 	r0, #SnakePos		; r0 = & SnakePos
+	loadn 	r0, #SnakePos		
 	inc 	r0
-	loadn 	r1, #' '			; r1 = ' '
+	loadn 	r1, #' '			; caractere espaço para apagar
 	loadi 	r2, r0			; r2 = SnakePos[0]
 		
 	loadn 	r3, #0			; r3 = 0
 	
 	Print_Loop:
-		outchar r1, r2
+		outchar r1, r2    ; imprime espaço na tela, apagando parte da cobra
 		
 		inc 	r0
 		loadi 	r2, r0
@@ -258,59 +261,58 @@ EraseSnake:
 
 
 
-Draw_Stage:
+Desenha_Fase: ; desenha a fase 30 linhas por 40 colunas (1200 posições)
 	
-	push r0	; protege o r0 na pilha para ser usado na subrotina
-	push r1	; protege o r1 na pilha para ser usado na subrotina
-	push r2	; protege o r2 na pilha para ser usado na subrotina
-	push r3	; protege o r3 na pilha para ser usado na subrotina
-	push r4	; protege o r4 na pilha para ser usado na subrotina
-	push r5	; protege o r5 na pilha para ser usado na subrotina
+	push r0	
+	push r1	
+	push r2	
+	push r3	
+	push r4	
+	push r5
 
-	loadn R0, #0  	; define a posicao inicial no comeco da tela!
-	loadn R3, #40  	; incremento da posicao da tela!
-	loadn R4, #41  	; incremento do ponteiro das linhas da tela
-	loadn R5, #1200 ; Limite da tela!
+	loadn r0, #0     ; posição inicial da tela
+	loadn r3, #40    ; incremento por linha (40 colunas)
+	loadn r4, #41    ; incremento do ponteiro da string (cada linha + \0)
+	loadn r5, #1200  ; limite da tela
 	
-   ImprimeTela_Loop:
-		call ImprimeStr
-		add r0, r0, r3  	; incrementaposicao para a segunda linha na tela -->  r0 = R0 + 40
-		add r1, r1, r4  	; incrementa o ponteiro para o comeco da proxima linha na memoria (40 + 1 porcausa do /0 !!) --> r1 = r1 + 41
-		cmp r0, r5			; Compara r0 com 1200
-		jne ImprimeTela_Loop	; Enquanto r0 < 1200
+	ImprimeTela_Loop:
+		call ImprimeStr  ; imprime uma linha
+		add r0, r0, r3   ; pula para a próxima linha da tela (próxima linha de 40 colunas)
+		add r1, r1, r4   ; avança o ponteiro da string para a próxima linha
+		cmp r0, r5
+		jne ImprimeTela_Loop
 
-	pop r5	; Resgata os valores dos registradores utilizados na Subrotina da Pilha
-	pop r4
-	pop r3
-	pop r2
-	pop r1
-	pop r0
-	rts
+		pop r5
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0
+		rts
 				
-;---------------------------	
-;********************************************************
-;                   IMPRIME STRING
-;********************************************************
-	
-ImprimeStr:	;  Rotina de Impresao de Mensagens:    r0 = Posicao da tela que o primeiro caractere da mensagem sera' impresso;  r1 = endereco onde comeca a mensagem; r2 = cor da mensagem.   Obs: a mensagem sera' impressa ate' encontrar "/0"
-	push r0	; protege o r0 na pilha para preservar seu valor
-	push r1	; protege o r1 na pilha para preservar seu valor
-	push r2	; protege o r1 na pilha para preservar seu valor
-	push r3	; protege o r3 na pilha para ser usado na subrotina
-	push r4	; protege o r4 na pilha para ser usado na subrotina
-	
-	loadn r3, #'\0'	; Criterio de parada
 
-   ImprimeStr_Loop:	
-		loadi r4, r1
-		cmp r4, r3		; If (Char == \0)  vai Embora
-		jeq ImprimeStr_Sai
-		add r4, r2, r4	; Soma a Cor com mudanca de fase
-		outchar r4, r0	; Imprime o caractere na tela
-		inc r0			; Incrementa a posicao na tela
-		inc r1			; Incrementa o ponteiro da String
-		jmp ImprimeStr_Loop
+
+ImprimeStr:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
 	
+	loadn r3, #'\0'
+
+	ImprimeStr_Loop:
+		loadi r4, r1          ; Carrega no r4 o caractere apontado por r1
+		cmp r4, r3            ; Compara o caractere atual com '\0'
+		jeq ImprimeStr_Sai    ; Se for igual a '\0', salta para ImprimeStr_Sai, encerrando a impressão.
+		
+		add r4, r2, r4        ; Soma r2 ao valor do caractere. 
+		
+		outchar r4, r0         ; Imprime o caractere (r4) na posição de tela (r0).
+		inc r0                 ; Incrementa a posição na tela para o próximo caractere.
+		inc r1                 ; Incrementa o ponteiro da string para o próximo caractere.
+		jmp ImprimeStr_Loop    ; Volta ao início do loop para continuar imprimindo.
+
    ImprimeStr_Sai:	
 	pop r4	; Resgata os valores dos registradores utilizados na Subrotina da Pilha
 	pop r3
@@ -322,72 +324,89 @@ ImprimeStr:	;  Rotina de Impresao de Mensagens:    r0 = Posicao da tela que o pr
 	
 
 Move_Snake:
-	push r0	; Dir / SnakePos
+	push r0	; Direcao / SnakePos
 	push r1	; inchar
 	push r2 ; local helper
 	push r3
 	push r4
 	
 	; Sincronização
-	loadn 	r0, #5000
+	loadn 	r0, #15000 ; MUDOU A VELOCIDADE NO PC DA PRO ALUNO !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	loadn 	r1, #0
-	mod 	r0, r6, r0		; r1 = r0 % r1 (Teste condições de contorno)
+	mod 	r0, r6, r0		; r0 = r6 % 10000 
 	cmp 	r0, r1
-	jne Move_End
-	; =============
+	jne Move_End ; isso indica que a cada 10000 ciclos o código abaixo será executado
 	
 	Check_Food:
-	
-	; --> R2 = Tela1Linha0 + posAnt + posAnt/40  ; tem que somar posAnt/40 no ponteiro pois as linas da string terminam com /0 !!
-	loadn r1, #tela0Linha0	; Endereco onde comeca a primeira linha do cenario!!
-	add r2, r1, r0	; R2 = Tela1Linha0 + posAnt
-	loadn r4, #40
-	div r3, r0, r4	; R3 = posAnt/40
-	add r2, r2, r3	; R2 = Tela1Linha0 + posAnt + posAnt/40
-	
-	loadi R5, R2	; R5 = Char (Tela(posAnt))
-		load 	r0, FoodPos ; posição da comida
-		loadn 	r1, #SnakePos ; posição da snake
-		loadi 	r2, r1
-		
+	; --> R2 = Tela1Linha0 + posAnt + posAnt/40  
+	; Precisamos somar posAnt/40 no ponteiro porque cada linha da string do cenário termina com um caractere '\0', 
+	; logo o endereço na memória não é linear apenas por posAnt, é preciso ajustar pelo número de quebras de linha.
+
+	loadn r1, #tela0Linha0	; Endereço do início do cenário na memória.
+	add r2, r1, r0	        ; R2 = endereço base + posAnt
+	loadn r4, #40           ; 40 é a largura da linha do cenário.
+	div r3, r0, r4	        ; r3 = posAnt/40 (quantas linhas completas acima)
+	; ex: andou 320 caracteres = percorreu 8 linhas
+	add r2, r2, r3	        ; R2 = Tela0Linha0 + posAnt + (posAnt/40), ajustando pelo '\0' no final de cada linha.
+
+		loadi R5, R2	        ; Carrega em R5 o caractere da tela na posição calculada (R2).
+		load 	r0, FoodPos    ; r0 = posição da comida
+		loadn 	r1, #SnakePos  ; r1 = endereço base do array SnakePos
+		loadi 	r2, r1         ; r2 = SnakePos[0], posição da cabeça da cobra
+
 		cmp r0, r2 ; verificando se a posição da comida é igual a da snake
-		jne Spread_Move	
+		jne Spread_Move	; não comeu a comida
 		
-		call Increment_score ; chamando função que incrementa a pontuação
+		call Increment_Pontuacao ; chamando função que incrementa a pontuação, caso não passe pelo jump no equal
 		
-		load 	r0, SnakeSize
+		load 	r0, SnakeTam
 		inc 	r0
-		store 	SnakeSize, r0
+		store 	SnakeTam, r0
 		
 		loadn 	r0, #0
 		dec 	r0
 		store 	FoodStatus, r0
 		
-	Spread_Move:
+
+
+;A rotina `Check_Food` verifica se a cabeça da cobra está na mesma posição que a comida no jogo Snake. 
+;Primeiro, calcula a posição exata da cabeça da cobra no cenário ajustando para considerar 
+;que cada linha do cenário termina com um caractere nulo (`'\0'`), somando a posição atual (`posAnt`) 
+;com o número de linhas já percorridas (`posAnt/40`), onde 40 é a largura de cada linha. 
+;Em seguida, compara essa posição calculada com a posição da comida (`FoodPos`). Se as posições coincidirem, 
+;significa que a cobra comeu a comida, então a rotina chama a função `Increment_Pontuacao` para aumentar 
+;a pontuação do jogador, incrementa `SnakeTam` para aumentar o tamanho da cobra, e define `FoodStatus` para 
+;-1, indicando que a comida foi consumida e precisa ser reposicionada. 
+;Se as posições não coincidirem, a rotina continua a execução normal do jogo sem realizar 
+;nenhuma ação adicional. Assim, `Check_Food` assegura que o  jogo responda 
+;adequadamente quando a cobra consome a comida, atualizando a pontuação, 
+;o tamanho da cobra e preparando a próxima comida.
+
+	Spread_Move: ; a lógica é para que o corpo acompanhe o movimento da cobra
 		loadn 	r0, #SnakePos
 		loadn 	r1, #SnakePos
-		load 	r2, SnakeSize
+		load 	r2, SnakeTam
 		
 		add 	r0, r0, r2		; r0 = SnakePos[Size]
 		
 		dec 	r2				; r1 = SnakePos[Size-1]
 		add 	r1, r1, r2
 		
-		loadn 	r4, #0
+		loadn r4, #0
 		
 		Spread_Loop:
-			loadi 	r3, r1
-			storei 	r0, r3
+			loadi r3, r1         ; r3 = SnakePos[Size-1] (posição do segmento anterior)
+			storei r0, r3        ; Atualiza SnakePos[Size] com a posição do segmento anterior
 			
-			dec r0
-			dec r1
+			dec r0               ; Move r0 para o próximo segmento
+			dec r1               ; Move r1 para o próximo segmento anterior
 			
-			cmp r2, r4
+			cmp r2, r4           ; Verifica se ainda há segmentos a serem processados
 			dec r2
+			jne Spread_Loop      ; Continua até que todos os segmentos tenham sido ajustados
+
 			
-			jne Spread_Loop	
-	
-	Change_Dir:
+	Change_Direcao:
 		inchar 	r1
 		
 		loadn r2, #100	; char r4 = 'd'
@@ -404,7 +423,9 @@ Move_Snake:
 		
 		loadn r2, #119	; char r4 = 'w'
 		cmp r1, r2
-		jeq Move_W		
+		jeq Move_W
+		
+		; o código acima faz a verificação da tecla pressionada no inchar
 		
 		jmp Update_Move
 	
@@ -412,45 +433,48 @@ Move_Snake:
 			loadn 	r0, #0
 			; Impede de "ir pra trás" - virar 180 graus
 			loadn 	r1, #2
-			load  	r2, Dir
-			cmp 	r1, r2
+			load  	r2, Direcao
+			cmp 	r1, r2 ; faz a verificação se a direção d r1 e r2 são iguais, caso seja ele move pra esquerda 
 			jeq 	Move_Left
 			
-			store 	Dir, r0
-			jmp 	Move_Right
+			store 	Direcao, r0
+			jmp 	Move_Right ; caso não seja, ele move pra direita
+			
+		; a lógica continua nas próximas interações
+		
 		Move_S:
 			loadn 	r0, #1
 			; Impede de "ir pra trás" - virar 180 graus
 			loadn 	r1, #3
-			load  	r2, Dir
+			load  	r2, Direcao
 			cmp 	r1, r2
 			jeq 	Move_Up
 			
-			store 	Dir, r0
+			store 	Direcao, r0
 			jmp 	Move_Down
 		Move_A:
 			loadn 	r0, #2
 			; Impede de "ir pra trás" - virar 180 graus
 			loadn 	r1, #0
-			load  	r2, Dir
+			load  	r2, Direcao
 			cmp 	r1, r2
 			jeq 	Move_Right
 			
-			store 	Dir, r0
+			store 	Direcao, r0
 			jmp 	Move_Left
 		Move_W:
 			loadn 	r0, #3
 			; Impede de "ir pra trás" - virar 180 graus
 			loadn 	r1, #1
-			load  	r2, Dir
+			load  	r2, Direcao
 			cmp 	r1, r2
 			jeq 	Move_Down
 			
-			store 	Dir, r0
+			store 	Direcao, r0
 			jmp 	Move_Up
 	
 	Update_Move:
-		load 	r0, Dir
+		load 	r0, Direcao
 				
 		loadn 	r2, #0
 		cmp 	r0, r2
@@ -536,21 +560,17 @@ Torre:
 
 
 	
-;--------------------------------------------------------------------------------------------------------
-; espaço para movimentação  do tiro
-MoveTiro:
-	
+
+MoveTiro: ; a cada interação do tiro ele verifica se a snake for atingida
 	call MoveTiro_RecalculaPos
-	call Shot_snake ; para cada vez que o tiro for processado, são feitas verificações para analisar se a snake foi atingida
+	call Shot_snake
 	call MoveTiro_Apaga
 	call Shot_snake
 	call MoveTiro_Desenha		
 	call Shot_snake
-	  
 	rts
 
-;--------------------------------------------------------------------------------------------------------
-MoveTiro_Apaga:
+MoveTiro_Apaga: ; move o tiro e apaga o rastro dele
 	push R0
 	push R1
 	push R2
@@ -606,7 +626,7 @@ MoveTiro_RecalculaPos:
   	loadn R2, #256
   	add R1, R1, R2
   	outchar R1, R0
-  	call inicialize_flag_e_tiro
+  	call Inicia_flag_e_tiro
   	call MoveTiro_Apaga
   	
   MoveTiro_RecalculaPos_Fim2:	
@@ -649,7 +669,7 @@ Shot_snake:
 	
 	loadn 	r0, #SnakePos
 	loadn 	r1, #SnakePos
-	load 	r2, SnakeSize
+	load 	r2, SnakeTam
 	load 	r5, posAtualTiro
 	
 	add 	r0, r0, r2		; r0 = SnakePos[Size]
@@ -680,24 +700,24 @@ Shot_snake:
 
 	
 
-Increment_score:
+Increment_Pontuacao:
 	push r0
 	push r1
 	push r2
 	
 	loadn r1, #1 ; colocando numero 1 no registrador r1 para somar com a pontuação atual
 	
-	load r0 , Score ; carregando pontuação atual em r0 
+	load r0 , Pontuacao ; carregando pontuação atual em r0 
 	add r0, r0 , r1
 
-	store Score, r0
+	store Pontuacao, r0
 	
 	loadn r2, #9
 	
 	outchar r0, r2
 	
 	loadn r3, #50
-	cmp r0, r3	;checa se o score chegou a 7 (55 em ASCII)
+	cmp r0, r3	;checa se o Pontuacao chegou a 7 (55 em ASCII)
 	jeq NextLevel
 	
 	
@@ -722,7 +742,7 @@ Replace_Food:
 	store FoodStatus, r1
 	load  r1, FoodPos
 	
-	load r0, Dir
+	load r0, Direcao
 	
 	loadn r2, #0
 	cmp r0, r2
@@ -1020,11 +1040,11 @@ Replace_Food:
 	
 	rts
 
-Dead_Snake_0: ; função para a fase 1
+Morte_Snake_1: ; função para a fase 1
 	loadn r0, #SnakePos
 	loadi r1, r0
 	
-	; colidiu na parede direita
+	; colidiu na parede Direita
 	loadn r2, #40
 	loadn r3, #39
 	mod r2, r1, r2		; r2 = r1 % r2 (Teste condições de contorno)
@@ -1053,7 +1073,7 @@ Dead_Snake_0: ; função para a fase 1
 	
 	; colidiu na própria cobra
 	Collision_Check:
-		load 	r2, SnakeSize
+		load 	r2, SnakeTam
 		loadn 	r3, #1
 		loadi 	r4, r0			
 		
@@ -1068,7 +1088,7 @@ Dead_Snake_0: ; função para a fase 1
 			jne Collision_Loop
 		
 	
-	jmp Dead_Snake_0_End
+	jmp Morte_Snake_1_End
 	
 	GameOver_Activate:
 		load 	r0, FoodPos
@@ -1087,15 +1107,15 @@ Dead_Snake_0: ; função para a fase 1
 		
 		jmp GameOver_loop
 	
-	Dead_Snake_0_End:
+	Morte_Snake_1_End:
 	
 	rts
 
-Dead_Snake_1: ; função para a fase 2
+Morte_Snake_2: ; função para a fase 2
 	loadn r0, #SnakePos
 	loadi r1, r0
 	
-	; colidiu na parede direita
+	; colidiu na parede Direita
 	loadn r2, #40
 	loadn r3, #39
 	mod r2, r1, r2		; r2 = r1 % r2 (Teste condições de contorno)
@@ -1126,7 +1146,7 @@ Dead_Snake_1: ; função para a fase 2
 	
 	; colidiu na própria cobra
 	Collision_Check:
-		load 	r2, SnakeSize
+		load 	r2, SnakeTam
 		loadn 	r3, #1
 		loadi 	r4, r0			; Posição da cabeça
 		
@@ -1141,7 +1161,7 @@ Dead_Snake_1: ; função para a fase 2
 			jne Collision_Loop
 		
 	
-	jmp Dead_Snake_1_End
+	jmp Morte_Snake_2_End
 	
 	GameOver_Activate:
 		load 	r0, FoodPos
@@ -1160,15 +1180,15 @@ Dead_Snake_1: ; função para a fase 2
 		
 		jmp GameOver_loop
 	
-	Dead_Snake_1_End:
+	Morte_Snake_2_End:
 	
 	rts
 
-Dead_Snake_2: ; função para a fase 3
+Morte_Snake_3: ; função para a fase 3
 	loadn r0, #SnakePos
 	loadi r1, r0
 	
-	; colidiu na parede direita
+	; colidiu na parede Direita
 	loadn r2, #40
 	loadn r3, #39
 	mod r2, r1, r2		; r2 = r1 % r2 (Testa condições de contorno)
@@ -1198,7 +1218,7 @@ Dead_Snake_2: ; função para a fase 3
 	
 	; colidiu na própria cobra
 	Collision_Check:
-		load 	r2, SnakeSize
+		load 	r2, SnakeTam
 		loadn 	r3, #1
 		loadi 	r4, r0			; Posição da cabeça
 		
@@ -1213,7 +1233,7 @@ Dead_Snake_2: ; função para a fase 3
 			jne Collision_Loop
 		
 	
-	jmp Dead_Snake_2_End
+	jmp Morte_Snake_3_End
 	
 	
 	
@@ -1236,7 +1256,7 @@ Dead_Snake_2: ; função para a fase 3
 		
 		jmp GameOver_loop
 	
-	Dead_Snake_2_End:
+	Morte_Snake_3_End:
 	
 	rts
 
@@ -1495,9 +1515,9 @@ Draw_Snake:
 	
 	loadn 	r0, #SnakePos	; r0 = & SnakePos
 	loadn 	r1, #' '		; r1 = ' '
-	load 	r3, SnakeSize	; r3 = SnakeSize
-	add 	r0, r0, r3		; r0 += SnakeSize
-	loadi 	r2, r0			; r2 = SnakePos[SnakeSize]
+	load 	r3, SnakeTam	; r3 = SnakeTam
+	add 	r0, r0, r3		; r0 += SnakeTam
+	loadi 	r2, r0			; r2 = SnakePos[SnakeTam]
 	outchar r1, r2
 	
 	Draw_End:
@@ -1512,7 +1532,7 @@ Delay:
 	push r0
 	
 	inc r6
-	load r0, Speed
+	load r0, Velocidade
 	cmp r6, r0
 	jgr Reset_Timer
 	
@@ -1599,17 +1619,17 @@ NextLevel:
 		loadn r2, #0
 		call Imprime
 	
-	load r0, Stage 
+	load r0, Fase 
 	loadn r1, #50
 	
 	cmp r0, r1 ; checa se concluiu o ultimo nivel. Em caso positivo, o jogo dá game over e recomeça
 	jeq GameOver_Activate
 	
-	call Draw_new_stage	
+	call Draw_new_Fase	
 	call EraseSnake
-	call Initialize
-	call inicialize_score	
-	call increase_speed
+	call Inicia
+	call Inicia_Pontuacao	
+	call increase_Velocidade
 	
 	pop r3
 	pop r2
@@ -1618,57 +1638,57 @@ NextLevel:
 	
 	jmp ingame_loop
 		
-increase_speed:
+increase_Velocidade:
 	push r0
 	push r1
 	
 	loadn r0, #300 
-	load r1, Speed
-	sub r1, r1, r0 ; reduzirá em 300 unidades o valor de Speed. Na função delay isso fará com que a snake se movimente mais rapido
-	store Speed, r1 
+	load r1, Velocidade
+	sub r1, r1, r0 ; reduzirá em 300 unidades o valor de Velocidade. Na função delay isso fará com que a snake se movimente mais rapido
+	store Velocidade, r1 
 	
 	pop r1
 	pop r0
 	
 	rts
 	
-Draw_new_stage:
+Draw_new_Fase:
 	push r0
 	push r1
 	push r2
 	
-	load r3, Stage ; salva o valor ASCII da fase atual (0 == 48, 1 == 49 , 2 == 50)
+	load r3, Fase ; salva o valor ASCII da fase atual (0 == 48, 1 == 49 , 2 == 50)
 	inc r3
-	store Stage, r3
+	store Fase, r3
 		
 	loadn r4, #49 
 	loadn r5, #50
 	
 	cmp r3, r4
-	jeq draw_stage2
+	jeq Desenha_Fase3
 	
-	jmp draw_stage3
+	jmp Desenha_Fase3
 	
-	draw_stage2:
+	Desenha_Fase3:
 		loadn R1, #tela2Linha0	; Endereco de inicio da primeira linha do cenario!!
 		loadn R2, #1024
-		call Draw_Stage
+		call Desenha_Fase
 		
 		outchar r3, r4 ; imprime o 1 em ascII  na posição 49 da tela
 				
-		jmp fim_draw_stage
+		jmp fim_Desenha_Fase
 		
 	;Desenhar a fase 3 
-	draw_stage3:
+	Desenha_Fase3:
 		loadn R1, #tela3Linha0	; Endereco de inicio da primeira linha do cenario!!
 		loadn R2, #256
-		call increase_speed
-		call Draw_Stage
+		call increase_Velocidade
+		call Desenha_Fase
 		
 		outchar r3, r4 
 		
 
-	fim_draw_stage:
+	fim_Desenha_Fase:
 
 	pop r2
 	pop r1
@@ -1770,15 +1790,15 @@ tela0Linha29 : string "                                        "
 	
 tela1Linha0  : string "PONTOS ==                               "
 tela1Linha1  : string "LEVEL ==                                "
-tela1Linha2  : string "                      JARDIM SECRETO    "
+tela1Linha2  : string "                                        "
 tela1Linha3  : string "}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-"
 tela1Linha4  : string "-                                      -"
-tela1Linha5  : string "}      @@@                             }"
-tela1Linha6  : string "-     @@@@@            @@@             -"
-tela1Linha7  : string "}      @@@            @@@@@            }"
-tela1Linha8  : string "-       |              @@@             -"
-tela1Linha9  : string "}       |               |      _       }"
-tela1Linha10 : string "-                       |       |      -"
+tela1Linha5  : string "}                                      }"
+tela1Linha6  : string "-                                      -"
+tela1Linha7  : string "}                                      }"
+tela1Linha8  : string "-                                      -"
+tela1Linha9  : string "}                              _       }"
+tela1Linha10 : string "-                               |      -"
 tela1Linha11 : string "}                               |      }"
 tela1Linha12 : string "-                                      -"
 tela1Linha13 : string "}                                      }"
@@ -1787,23 +1807,23 @@ tela1Linha15 : string "}                                      }"
 tela1Linha16 : string "-                                      -"
 tela1Linha17 : string "}                                      }"
 tela1Linha18 : string "-                                      -"
-tela1Linha19 : string "}   @@@                                }"
-tela1Linha20 : string "-  @@@@@                               -"
-tela1Linha21 : string "}   @@@                                }"
-tela1Linha22 : string "-    |     |                           -"
-tela1Linha23 : string "}    |     |                           }"
-tela1Linha24 : string "-          |_                    @@@   -"
-tela1Linha25 : string "}                               @@@@@  }"
-tela1Linha26 : string "-                                @@@   -"
-tela1Linha27 : string "}                                 |    }"
-tela1Linha28 : string "-                                 |    -"
+tela1Linha19 : string "}                                      }"
+tela1Linha20 : string "-                                      -"
+tela1Linha21 : string "}                                      }"
+tela1Linha22 : string "-          |                           -"
+tela1Linha23 : string "}          |                           }"
+tela1Linha24 : string "-          |_                          -"
+tela1Linha25 : string "}                                      }"
+tela1Linha26 : string "-                                      -"
+tela1Linha27 : string "}                                      }"
+tela1Linha28 : string "-                                      -"
 tela1Linha29 : string "}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-"	
 
 
 
 tela2Linha0  : string "PONTOS ==                               "
 tela2Linha1  : string "LEVEL ==                                "
-tela2Linha2  : string "                          CANTINA       "
+tela2Linha2  : string "                                        "
 tela2Linha3  : string " ______________________________________ "
 tela2Linha4  : string "|                                      |"
 tela2Linha5  : string "|                                      |"
@@ -1834,7 +1854,7 @@ tela2Linha29 : string "|______________________________________|"
 
 tela3Linha0  : string "PONTOS ==                               "
 tela3Linha1  : string "LEVEL ==                                "
-tela3Linha2  : string "                          SAÍDA DA MAT  "
+tela3Linha2  : string "                                        "
 tela3Linha3  : string " ______________________________________ "
 tela3Linha4  : string "|                                      |"
 tela3Linha5  : string "|                                      |"
