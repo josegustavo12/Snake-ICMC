@@ -1940,7 +1940,7 @@ tela2Linha29 : string "|______________________________________|"
 
 tela3Linha0  : string "PONTOS ==                               "
 tela3Linha1  : string "LEVEL ==                                "
-tela3Linha2  : string "          ´SAIDA DA MATEMATICA          "
+tela3Linha2  : string "           SAIDA DA MATEMATICA          "
 tela3Linha3  : string " ______________________________________ "
 tela3Linha4  : string "|                                      |"
 tela3Linha5  : string "|                                      |"
