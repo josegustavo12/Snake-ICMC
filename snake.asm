@@ -31,11 +31,63 @@ NextLevelMessage: 		string " APERTE 'SPACE' E CONTINUE "
 EraseNextLevelMessage:	string "                               "
 
 
+inicialLinha0  : string "                                        "
+inicialLinha1  : string "                                        "
+inicialLinha2  : string "       _____             _              "
+inicialLinha3  : string "      / ____|           | |             "
+inicialLinha4  : string "     | (___  _ __   __ _| | _____       "
+inicialLinha5  : string "      z___ z| '_ z / _` | |/ / _ z      "
+inicialLinha6  : string "      ____) | | | | (_| |   <  __/      "
+inicialLinha7  : string "     |_____/|_| |_|z__,_|_|z_z___|      "
+inicialLinha8  : string "                                        "
+inicialLinha9  : string "                                        "
+inicialLinha10 : string "       _____ _____ __  __  _____        "
+inicialLinha11 : string "      |_   _/ ____|  z/  |/ ____|       "
+inicialLinha12 : string "        | || |    | z  / | |            "
+inicialLinha13 : string "        | || |    | |z/| | |            "
+inicialLinha14 : string "       _| || |____| |  | | |____        "
+inicialLinha15 : string "      |_____z_____|_|  |_|z_____|       "
+inicialLinha16 : string "                                        "
+inicialLinha17 : string "                                        "
+inicialLinha18 : string "                                        "
+inicialLinha19 : string "                                        "
+inicialLinha20 : string "       APERTE SPACE PARA INICIAR        "
+inicialLinha21 : string "                                        "
+inicialLinha22 : string "                                        "
+inicialLinha23 : string "                                        "
+inicialLinha24 : string "                                        "
+inicialLinha25 : string "                                        "
+inicialLinha26 : string "                                        "
+inicialLinha27 : string "                                        "
+inicialLinha28 : string "                                        "
+inicialLinha29 : string "                                        "
+
+
+
+
+tela_de_inicio_original:
+
+	loadn R1, #inicialLinha0	; Carrega r1 com o endereco do vetor que contem a mensagem
+	loadn R2, #512
+	call Desenha_Fase
+
+tela_de_inicio_botao:
+	inchar 	r3
+	loadn 	r4, #' '	
+	cmp r3, r4
+
+	jne tela_de_inicio_botao
+		
+
+
+
+
+
 ; Main
 main:
 	
 	; inicializando o jogo, chamando as subrotinas e carregando a tela inicial
-	call Inicia_Velocidade ; velocidade = 6000
+	call Inicia_Velocidade ; velocidade = 600
 	call Inicia_flag_e_tiro ; estado do tiro = 0 ou 1; posicao do tiro (atual e anterior)
 	call Inicia
 
@@ -43,6 +95,8 @@ main:
 	loadn R1, #tela1Linha0	; Endereco da primeira linha do ambiente do jogo
 	loadn R2, #0
 	call Desenha_Fase
+
+
 
 	call Inicia_Pontuacao	; inicia o placar
 	call Inicia_Fase_numero	; inicia o numero da fase
@@ -61,13 +115,26 @@ main:
 				
 				
 			jmp ingame_loop
-		
 		GameOver_loop:
+			call tela_final_perdeu
 			call Restart_Game
-		
+			
+			
 			jmp GameOver_loop
+			
+		GameOver_Ganhar:
+			call tela_final_ganhou
+			call Restart_Game
+			jmp GameOver_Ganhar
+
+			
 	
 ; Funções
+
+
+
+
+
 
 Fase_colisoes:
 	
@@ -115,7 +182,7 @@ Fase_colisoes:
 
 Inicia_Pontuacao:
 	
-	loadn r0, #48 ; inicializa a pontuação com zero
+	loadn r0, #48 ; inicializa a pontuação com zer
 	store Pontuacao, r0 ; carrega a pontação no Pontuacao
 	
 	loadn r1, #9 ; posição da pontuação na tela
@@ -139,7 +206,7 @@ Inicia_Fase_numero:
 
 Inicia_Velocidade:
 	
-	loadn r0, #6000
+	loadn r0, #6000 
 	store Velocidade, r0 ; carrega o Velocidade com 6000
 		 
 	rts
@@ -179,11 +246,18 @@ Inicia: ; 1. inicia o tamanho da cobra 2. declara cada pedaço da cobra 3. print
 		inc 	r0
 		dec 	r1
 		storei 	r0, r1
-
-		; SnakePos[3] = -1
+		
+		; SnakePos[3] = 457
 		inc 	r0
 		dec 	r1
 		storei 	r0, r1
+		
+		; SnakePos[4] = -1
+		inc 	r0
+		loadn 	r1, #0
+		storei 	r0, r1
+
+		
 		
 				
 		call FirstPrintSnake ; printa a cobra inicial
@@ -716,7 +790,7 @@ Increment_Pontuacao:
 	
 	outchar r0, r2
 	
-	loadn r3, #50
+	loadn r3, #49
 	cmp r0, r3	;checa se o Pontuacao chegou a 7 (55 em ASCII)
 	jeq NextLevel
 	
@@ -1094,17 +1168,7 @@ Morte_Snake_1: ; função para a fase 1
 		load 	r0, FoodPos
 		loadn 	r1, #' '
 		outchar r1, r0
-	
-		loadn r0, #615
-		loadn r1, #GameOverMessage
-		loadn r2, #0
-		call Imprime
-		
-		loadn r0, #687
-		loadn r1, #RestartMessage
-		loadn r2, #0
-		call Imprime
-		
+			
 		jmp GameOver_loop
 	
 	Morte_Snake_1_End:
@@ -1243,16 +1307,7 @@ Morte_Snake_3: ; função para a fase 3
 		load 	r0, FoodPos
 		loadn 	r1, #' '
 		outchar r1, r0
-	
-		loadn r0, #615
-		loadn r1, #GameOverMessage
-		loadn r2, #0
-		call Imprime
-		
-		loadn r0, #687
-		loadn r1, #RestartMessage
-		loadn r2, #0
-		call Imprime
+
 		
 		jmp GameOver_loop
 	
@@ -1479,12 +1534,14 @@ turret_check:
 
 
 
-
 Draw_Snake:
 	push r0
 	push r1
 	push r2
 	push r3 
+	push r4
+	push r5
+	push r6
 	
 	; --> R2 = Tela1Linha0 + posAnt + posAnt/40  ; tem que somar posAnt/40 no ponteiro pois as linas da string terminam com /0 !!
 	loadn R1, #tela0Linha0	; Endereco onde comeca a primeira linha do cenario!!
@@ -1514,18 +1571,52 @@ Draw_Snake:
 	outchar r1, r2			
 	
 	loadn 	r0, #SnakePos	; r0 = & SnakePos
-	loadn 	r1, #' '		; r1 = ' '
+	
+	
+	
+	;loadn 	r1, #' '		; r1 = ' '
 	load 	r3, SnakeTam	; r3 = SnakeTam
 	add 	r0, r0, r3		; r0 += SnakeTam
 	loadi 	r2, r0			; r2 = SnakePos[SnakeTam]
-	outchar r1, r2
+	load r0, Fase			; r0 = fase atual
+	loadn r6, #48			; r6 = 48 (relativo a fase 1)
+	cmp r6, r0				; Se a fase atual for a primeira
+	ceq Set_cenario1		; Chama uma função que coloca a posição inicial do cenario 1 em r1
+	loadn r6, #49			; r6 = 49 (relativo a fase 2)
+	cmp r6, r0				; Se a fase atual for a segunda
+	ceq Set_cenario2		; Chama uma função que coloca a posição inicial do cenario 2 em r1
+	loadn r6, #50			; r6 = 50 (relativo a fase 3)
+	cmp r6, r0				; Se a fase atual for a terceira
+	ceq Set_cenario3		; Chama uma função que coloca a posição inicial do cenario 3 em r1
+	loadn r4, #40			; r4 = 40
+	div r3, r2, r4 			; r3 = SnakePos[SnakeTam]/40
+	add r1, r1, r2			; r1 = PosInicialCenarioAtual + SnakePos[SnakeTam] + SnakePos[SnakeTam]/40
+	add r1, r3, r1
+	loadi r5, r1			; r5 é o caracter relativo a posição no cenario a ser printada
+	outchar r5, r2			; printa o caracter de r5 na posição final da cobra
 	
 	Draw_End:
+		pop r6
+		pop r5
+		pop r4
 		pop	r3
 		pop r2
 		pop r1
 		pop r0
 	
+	rts
+	
+	
+Set_cenario1:				; Função que coloca a posição inicial do cenario 1 em r1
+	loadn r1, #tela1Linha0
+	rts
+	
+Set_cenario2:				; Função que coloca a posição inicial do cenario 2 em r1
+	loadn r1, #tela2Linha0
+	rts
+	
+Set_cenario3:				; Função que coloca a posição inicial do cenario 3 em r1
+	loadn r1, #tela3Linha0
 	rts
 ;--------------------------------------------------------------------------------------------------------
 Delay:
@@ -1623,7 +1714,7 @@ NextLevel:
 	loadn r1, #50
 	
 	cmp r0, r1 ; checa se concluiu o ultimo nivel. Em caso positivo, o jogo dá game over e recomeça
-	jeq GameOver_Activate
+	jeq GameOver_Ganhar
 	
 	call Draw_new_Fase	
 	call EraseSnake
@@ -1665,11 +1756,11 @@ Draw_new_Fase:
 	loadn r5, #50
 	
 	cmp r3, r4
-	jeq Desenha_Fase3
+	jeq Desenha_Fase2
 	
 	jmp Desenha_Fase3
 	
-	Desenha_Fase3:
+	Desenha_Fase2:
 		loadn R1, #tela2Linha0	; Endereco de inicio da primeira linha do cenario!!
 		loadn R2, #1024
 		call Desenha_Fase
@@ -1756,6 +1847,20 @@ Imprime:
 		pop r0
 		
 	rts
+	
+tela_final_perdeu:
+	loadn R1, #perdeuLinha0	; Carrega r1 com o endereco do vetor que contem a mensagem
+	loadn R2, #2304
+	call Desenha_Fase
+	rts
+
+tela_final_ganhou:
+	loadn R1, #ganhouLinha0	; Carrega r1 com o endereco do vetor que contem a mensagem
+	loadn R2, #2816
+	call Desenha_Fase
+	rts
+
+
 
 tela0Linha0  : string "                                        "
 tela0Linha1  : string "                                        "
@@ -1788,17 +1893,18 @@ tela0Linha27 : string "                                        "
 tela0Linha28 : string "                                        "
 tela0Linha29 : string "                                        "	
 	
+
 tela1Linha0  : string "PONTOS ==                               "
 tela1Linha1  : string "LEVEL ==                                "
-tela1Linha2  : string "                                        "
+tela1Linha2  : string "            JARDIM SECRETO              "
 tela1Linha3  : string "}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-"
 tela1Linha4  : string "-                                      -"
-tela1Linha5  : string "}                                      }"
-tela1Linha6  : string "-                                      -"
-tela1Linha7  : string "}                                      }"
-tela1Linha8  : string "-                                      -"
-tela1Linha9  : string "}                              _       }"
-tela1Linha10 : string "-                               |      -"
+tela1Linha5  : string "}      @@@                             }"
+tela1Linha6  : string "-     @@@@@            @@@             -"
+tela1Linha7  : string "}      @@@            @@@@@            }"
+tela1Linha8  : string "-       |              @@@             -"
+tela1Linha9  : string "}       |               |      _       }"
+tela1Linha10 : string "-                       |       |      -"
 tela1Linha11 : string "}                               |      }"
 tela1Linha12 : string "-                                      -"
 tela1Linha13 : string "}                                      }"
@@ -1807,50 +1913,52 @@ tela1Linha15 : string "}                                      }"
 tela1Linha16 : string "-                                      -"
 tela1Linha17 : string "}                                      }"
 tela1Linha18 : string "-                                      -"
-tela1Linha19 : string "}                                      }"
-tela1Linha20 : string "-                                      -"
-tela1Linha21 : string "}                                      }"
-tela1Linha22 : string "-          |                           -"
-tela1Linha23 : string "}          |                           }"
-tela1Linha24 : string "-          |_                          -"
-tela1Linha25 : string "}                                      }"
-tela1Linha26 : string "-                                      -"
-tela1Linha27 : string "}                                      }"
-tela1Linha28 : string "-                                      -"
-tela1Linha29 : string "}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-"	
+tela1Linha19 : string "}   @@@                                }"
+tela1Linha20 : string "-  @@@@@                               -"
+tela1Linha21 : string "}   @@@                                }"
+tela1Linha22 : string "-    |     |                           -"
+tela1Linha23 : string "}    |     |                           }"
+tela1Linha24 : string "-          |_                    @@@   -"
+tela1Linha25 : string "}                               @@@@@  }"
+tela1Linha26 : string "-                                @@@   -"
+tela1Linha27 : string "}                                 |    }"
+tela1Linha28 : string "-                                 |    -"
+tela1Linha29 : string "}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-}-"		
+
 
 
 
 tela2Linha0  : string "PONTOS ==                               "
 tela2Linha1  : string "LEVEL ==                                "
-tela2Linha2  : string "                                        "
+tela2Linha2  : string "                CANTINA                 "
 tela2Linha3  : string " ______________________________________ "
 tela2Linha4  : string "|                                      |"
 tela2Linha5  : string "|                                      |"
 tela2Linha6  : string "|                                      |"
-tela2Linha7  : string "|                                      |"
+tela2Linha7  : string "|         *                   *~~      |"
 tela2Linha8  : string "|                                      |"
 tela2Linha9  : string "|                              _       |"
 tela2Linha10 : string "|      ______                   |      |"
-tela2Linha11 : string "|      |    |                   |      |"
+tela2Linha11 : string "|      |   ~|                   |      |"
 tela2Linha12 : string "|      |____|                          |"
 tela2Linha13 : string "|                                      |"
 tela2Linha14 : string "|                                      |"
 tela2Linha15 : string "|                                      |"
 tela2Linha16 : string "|                                      |"
-tela2Linha17 : string "|                                      |"
+tela2Linha17 : string "|        *                             |"
 tela2Linha18 : string "|                                      |"
 tela2Linha19 : string "|                                      |"
 tela2Linha20 : string "|                                      |"
 tela2Linha21 : string "|                                      |"
-tela2Linha22 : string "|                     ______           |"
-tela2Linha23 : string "|                     |    |           |"
+tela2Linha22 : string "|    *                 ______          |"
+tela2Linha23 : string "|                     | ^* |           |"
 tela2Linha24 : string "|                     |____|           |"
 tela2Linha25 : string "|                                      |"
-tela2Linha26 : string "|                                      |"
+tela2Linha26 : string "|               *~                     |"
 tela2Linha27 : string "|                                      |"
 tela2Linha28 : string "|                                      |"
-tela2Linha29 : string "|______________________________________|"	
+tela2Linha29 : string "|______________________________________|"
+	
 
 tela3Linha0  : string "PONTOS ==                               "
 tela3Linha1  : string "LEVEL ==                                "
@@ -1878,9 +1986,75 @@ tela3Linha22 : string "|          |                           |"
 tela3Linha23 : string "|          |                           |"
 tela3Linha24 : string "|          |_                          |"
 tela3Linha25 : string "|                                      |"
-tela3Linha26 : string "|                  !                   |"
-tela3Linha27 : string "|                 <|>                  |"
-tela3Linha28 : string "|                &&&&&                 |"
-tela3Linha29 : string "|______________________________________|"	
+tela3Linha26 : string "|                 xw                   |"
+tela3Linha27 : string "|                 vu                   |"
+tela3Linha28 : string "|                 {{                   |"
+tela3Linha29 : string "|______________________________________|"
+
+
+perdeuLinha0  : string "                                        "
+perdeuLinha1  : string "                                        "
+perdeuLinha2  : string "  __      ______   _____  //z           "
+perdeuLinha3  : string "  z z    / / __ z / ____||/ z |         "
+perdeuLinha4  : string "   z z  / / |  | | |    | ____|         "
+perdeuLinha5  : string "    z z/ /| |  | | |    |  _|           "
+perdeuLinha6  : string "     z  / | |__| | |____| |___          "
+perdeuLinha7  : string "      z/   z____/ z_____|_____|         "
+perdeuLinha8  : string "                                        "
+perdeuLinha9  : string "                                        "
+perdeuLinha10 : string " _____  ____ _____  _____  _____ _    _ "
+perdeuLinha11 : string "|  __ z|  __|  __ z|  __ z|  ___| |  | |"
+perdeuLinha12 : string "| |__) | |_ | |__) | |  | | |_  | |  | |"
+perdeuLinha13 : string "|  ___/|  _||  _  /| |  | |  _| | |  | |"
+perdeuLinha14 : string "| |    | |__| | z z| |__| | |___| |__| |"
+perdeuLinha15 : string "|_|    |____|_|  z_|_____/|_____|z____/ "
+perdeuLinha16 : string "                                        "
+perdeuLinha17 : string "                                        "
+perdeuLinha18 : string "                                        "
+perdeuLinha19 : string "                                        "
+perdeuLinha20 : string "  APERTE SPACE PARA JOGAR NOVAMENTE     "
+perdeuLinha21 : string "                                        "
+perdeuLinha22 : string "                                        "
+perdeuLinha23 : string "                                        "
+perdeuLinha24 : string "                                        "
+perdeuLinha25 : string "                                        "
+perdeuLinha26 : string "                                        "
+perdeuLinha27 : string "                                        "
+perdeuLinha28 : string "                                        "
+perdeuLinha29 : string "                                        "	
+
+ganhouLinha0  : string "      __     _____   ____  //z          "
+ganhouLinha1  : string "      z z   / / _ z / ___||/_z|         "
+ganhouLinha2  : string "       z z / / | | | |   | ____|        "
+ganhouLinha3  : string "        z V /| |_| | |___|  _|_         "
+ganhouLinha4  : string "         z_/  z___/ z____|_____|        "
+ganhouLinha5  : string "                                        "
+ganhouLinha6  : string "  ____    _    _   _ _   _  ___  _   _  "
+ganhouLinha7  : string " / ___|  / z  | z | | | | |z _ z| | | | "
+ganhouLinha8  : string "| |  _  / _ z |  z| | |_| | | | | | | | "
+ganhouLinha9  : string "| |_| |/ ___ z| |z  |  _  | |_| | |_| | "
+ganhouLinha10 : string " z____/_/   z_z_| z_|_| |_|z___/ z___/  "
+ganhouLinha11 : string "                                        "
+ganhouLinha12 : string "                                        "
+ganhouLinha13 : string "                                        "
+ganhouLinha14 : string "                                        "
+ganhouLinha15 : string "                                        "
+ganhouLinha16 : string "                                        "
+ganhouLinha17 : string "                                        "
+ganhouLinha18 : string "                                        "
+ganhouLinha19 : string "                                        "
+ganhouLinha20 : string "                                        "
+ganhouLinha21 : string "                                        "
+ganhouLinha22 : string "    APERTE SPACE PARA CONTINUAR         "
+ganhouLinha23 : string "                                        "
+ganhouLinha24 : string "                                        "
+ganhouLinha25 : string "                                        "
+ganhouLinha26 : string "                                        "
+ganhouLinha27 : string "                                        "
+ganhouLinha28 : string "                                        "
+ganhouLinha29 : string "                                        "
+
+
+	
 
 	
