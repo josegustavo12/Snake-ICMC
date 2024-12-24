@@ -1,3 +1,5 @@
+[Vídeo explicando e mostrando o Snake](https://youtu.be/lz7GZVffvIY?si=6T9XY1NpadcTVqqN)
+
 # Documentação Detalhada do Código do Jogo Snake em Assembly
 
 ## Índice
